@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+    <!-- 글 내용 -->
+    <div class="bg-white shadow-md rounded p-6">
+        <p class="text-gray-500 text-l"
+           th:text="${dto.boardMajor}+' 게시판'">
+        </p>
+        <h2 class="text-2xl font-bold" th:text="${dto.title}"></h2>
+        <p class="text-gray-500 text-sm"
+           th:text="'작성자: ' + ${dto.writerName} + ' | '+ ${dto.writerMajor} + ' | ' + ${#temporals.format(dto.regDate, 'yyyy.MM.dd HH:mm')}">
+        </p>
+
+
+        <p class="mt-4 text-gray-800" th:text="${dto.content}"></p>
+
+        <!-- 추천/비추천 버튼 -->
+        <div class="flex justify-center items-center mt-6 space-x-8">
+            <!-- 추천 버튼 -->
+            <button class="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                <span class="text-lg">👍</span>
+                <span class="ml-2" th:text="'추천(' + ${dto.likes} + ')'"></span>
+            </button>
+
+            <!-- 비추천 버튼 -->
+            <button class="flex items-center bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                <span class="text-lg">👎</span>
+                <span class="ml-2" th:text="'비추천(' + ${dto.disLikes} + ')'"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 댓글 섹션 -->
+    <div class="bg-white shadow-md rounded p-6 mt-6">
+        <h3 class="text-xl font-bold mb-4">댓글</h3>
+        <ul>
+            <li class="border-b py-4">
+                <p class="text-gray-800">좋은 글이네요! 감사합니다.</p>
+                <p class="text-gray-500 text-sm">작성자: 댓글러 | 2024-11-26</p>
+            </li>
+        </ul>
+
+        <!-- 댓글 작성 -->
+        <form class="mt-4">
+            <textarea class="w-full border rounded p-2" rows="3" placeholder="댓글을 작성하세요."></textarea>
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mt-2">
+                댓글 작성
+            </button>
+        </form>
+    </div>
+
+    <!-- 뒤로가기 버튼 -->
+    <div class="text-right mt-4">
+        <a href="/" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">목록으로</a>
+    </div>
+</main>
+</html>

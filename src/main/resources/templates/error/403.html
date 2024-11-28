@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+<main class="bg-white shadow-md rounded p-6 w-96 text-center mb-10">
+    <!-- 페이지 내용 -->
+    <h2 class="text-2xl font-bold mb-4">403 Forbidden</h2>
+    <h2 class="text-2xl font-bold mb-4">권한이 필요해요</h2>
+<!--    <h2 class="text-2xl font-bold mb-4">페이지를 찾을 수 없어요</h2>-->
+    <!-- 홈 버튼 -->
+    <a th:href="@{/}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 inline-block">
+        메인 페이지로
+    </a>
+</main>
+
+</body>
+</html>

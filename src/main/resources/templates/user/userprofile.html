@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+<div class="container mx-auto p-6">
+    <!-- 프로필 카드 -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">프로필 확인</h1>
+        <div class="mb-4">
+            <p class="font-bold text-gray-600">이름:</p>
+            <p class="text-gray-800">홍길동</p>
+        </div>
+        <div class="mb-4">
+            <p class="font-bold text-gray-600">이메일:</p>
+            <p class="text-gray-800">example@email.com</p>
+        </div>
+        <div class="mb-4">
+            <p class="font-bold text-gray-600">닉네임:</p>
+            <p class="text-gray-800">길동이</p>
+        </div>
+        <div class="mb-4">
+            <p class="font-bold text-gray-600">전화번호:</p>
+            <p class="text-gray-800">010-1234-5678</p>
+        </div>
+
+        <!-- 수정 버튼 -->
+        <div class="text-right">
+            <a href="/profile/edit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                수정하기
+            </a>
+        </div>
+    </div>
+</div>
+</main>
+</html>

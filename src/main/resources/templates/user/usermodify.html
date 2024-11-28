@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+
+<main class="container mx-auto mt-8">
+<div class="container mx-auto p-6">
+    <!-- 수정 폼 -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">프로필 수정</h1>
+        <form action="/profile/update" method="post">
+            <!-- 이름 -->
+            <div class="mb-4">
+                <label for="name" class="block text-gray-600 font-bold mb-2">이름</label>
+                <input type="text" id="name" name="name" class="w-full border rounded p-2" placeholder="이름을 입력하세요" value="홍길동" required>
+            </div>
+
+            <!-- 이메일 -->
+            <div class="mb-4">
+                <label for="email" class="block text-gray-600 font-bold mb-2">이메일</label>
+                <input type="email" id="email" name="email" class="w-full border rounded p-2 bg-gray-100" value="example@email.com" readonly>
+            </div>
+
+            <!-- 닉네임 -->
+            <div class="mb-4">
+                <label for="nickname" class="block text-gray-600 font-bold mb-2">닉네임</label>
+                <input type="text" id="nickname" name="nickname" class="w-full border rounded p-2" placeholder="닉네임을 입력하세요" value="길동이" required>
+            </div>
+
+            <!-- 전화번호 -->
+            <div class="mb-4">
+                <label for="phone" class="block text-gray-600 font-bold mb-2">전화번호</label>
+                <input type="tel" id="phone" name="phone" class="w-full border rounded p-2" placeholder="전화번호를 입력하세요" value="010-1234-5678" required>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="text-right">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    저장하기
+                </button>
+                <a href="/profile" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 ml-2">
+                    취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+</main>
+</html>

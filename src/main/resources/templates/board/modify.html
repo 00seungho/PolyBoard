@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+    <!-- 글 수정 폼 -->
+    <div class="bg-white shadow-md rounded p-6">
+        <h2 class="text-2xl font-bold mb-4">글 수정</h2>
+        <form th:action="@{/post/update}" method="post">
+            <!-- Hidden ID -->
+            <input type="hidden" th:value="${post.id}" name="id">
+
+            <!-- 제목 -->
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700 font-bold mb-2">제목</label>
+                <input type="text" id="title" name="title" th:value="${post.title}" class="w-full border rounded p-2" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <!-- 작성자 -->
+            <div class="mb-4">
+                <label for="author" class="block text-gray-700 font-bold mb-2">작성자</label>
+                <input type="text" id="author" name="author" th:value="${post.author}" class="w-full border rounded p-2 bg-gray-100" readonly>
+            </div>
+
+            <!-- 내용 -->
+            <div class="mb-4">
+                <label for="content" class="block text-gray-700 font-bold mb-2">내용</label>
+                <textarea id="content" name="content" rows="6" class="w-full border rounded p-2" placeholder="내용을 입력하세요" required th:text="${post.content}"></textarea>
+            </div>
+
+            <!-- 수정 버튼 -->
+            <div class="text-right">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    수정 완료
+                </button>
+                <a href="/" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 ml-2">
+                    취소
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+</html>

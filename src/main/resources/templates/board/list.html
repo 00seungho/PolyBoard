@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+    <!-- 글 목록 -->
+    <div class="bg-white shadow-md rounded p-6">
+        <h2 class="text-2xl font-bold mb-4">글 목록</h2>
+        <ul>
+            <li class="border-b py-4">
+                <a href="/post/1" class="text-blue-600 hover:underline">첫 번째 글</a>
+                <p class="text-gray-500 text-sm">작성자: 홍길동 | 2024-11-26</p>
+            </li>
+            <li class="border-b py-4">
+                <a href="/post/2" class="text-blue-600 hover:underline">두 번째 글</a>
+                <p class="text-gray-500 text-sm">작성자: 김철수 | 2024-11-25</p>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 글 작성 버튼 -->
+    <div class="text-right mt-4">
+        <a href="/post/new" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">글 작성</a>
+    </div>
+</main>
+</html>

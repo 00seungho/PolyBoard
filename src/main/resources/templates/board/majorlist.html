@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+    <!-- 게시판 목록 -->
+    <div class="container mx-auto mt-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">게시판 목록</h2>
+        <div class="bg-white shadow-md rounded p-6">
+            <ul>
+                <li th:each="dto : ${dtoList}" class="border-b py-4">
+                    <a th:href="@{/board/list(category=${dto.name})}"
+                       th:text="${dto.name}"
+                       class="text-blue-600 hover:underline">
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</main>
+</html>
