@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:replace="assets/topbar :: setContent('')"></div>
+<main class="container mx-auto mt-8">
+    <!-- 글 작성 폼 -->
+    <div class="bg-white shadow-md rounded p-6">
+        <form>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="title">제목</label>
+                <input type="text" id="title" class="w-full border rounded p-2" placeholder="제목을 입력하세요.">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="content">내용</label>
+                <textarea id="content" class="w-full border rounded p-2" rows="5" placeholder="내용을 입력하세요."></textarea>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                작성하기
+            </button>
+        </form>
+    </div>
+
+    <!-- 뒤로가기 버튼 -->
+    <div class="text-right mt-4">
+        <a href="/" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">목록으로</a>
+    </div>
+</main>
+</html>
