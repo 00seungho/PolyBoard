@@ -4,22 +4,76 @@
 <main class="container mx-auto mt-8">
     <!-- 글 목록 -->
     <div class="bg-white shadow-md rounded p-6">
-        <h2 class="text-2xl font-bold mb-4">글 목록</h2>
+        <h2 class="text-2xl font-bold mb-4" th:if="${pageRequestDTO.category == ''}">전체 글 목록</h2>
+        <h2 class="text-2xl font-bold mb-4" th:if="${pageRequestDTO.category != ''}" th:text="${pageRequestDTO.category + ' 게시판'}"></h2>
+
         <ul>
-            <li class="border-b py-4">
-                <a href="/post/1" class="text-blue-600 hover:underline">첫 번째 글</a>
-                <p class="text-gray-500 text-sm">작성자: 홍길동 | 2024-11-26</p>
-            </li>
-            <li class="border-b py-4">
-                <a href="/post/2" class="text-blue-600 hover:underline">두 번째 글</a>
-                <p class="text-gray-500 text-sm">작성자: 김철수 | 2024-11-25</p>
+
+            <li th:each="dto : ${result.dtoList}" class="border-b py-4">
+                <!-- 공지 유형 표시 -->
+                <a th:href="@{/board/read(id=${dto.id}, page=${result?.page ?: 1}, type=${pageRequestDTO?.type ?: ''}, keyword=${pageRequestDTO?.keyword ?: ''}, category=${pageRequestDTO?.category ?: ''})}"
+                   class="text-blue-600 hover:underline">
+                    <span th:if="${dto.allNotice}" class="text-red-600 font-bold">[전체 공지]</span>
+                    <span th:if="${!dto.allNotice and dto.departmentNotice}" class="text-green-600 font-bold"
+                          th:text="'[' + ${dto.boardMajor} + ' 공지]'"></span>
+                    <span th:text="${dto.title}"></span>
+                </a>
+
+                <!-- 작성자 -->
+                <p th:text="'작성자: ' + ${dto.writerName}" class="text-gray-500 text-sm"></p>
+                <!-- 학과 이름 -->
+                <p th:text="${dto.boardMajor}" class="text-gray-500 text-sm"></p>
+                <!-- 날짜 및 추천/비추천 -->
+                <p th:text="'등록일: '+${#temporals.format(dto.regDate, 'yyyy.MM.dd HH:mm')}"
+                   class="text-gray-500 text-sm">
+                </p>
+                <p th:text="'추천: '+${dto.likes} +' | ' + '비추천: '+${dto.disLikes} +' | '+ '댓글: '+${dto.replyCount}"
+                   class="text-gray-500 text-sm">
+                </p>
             </li>
         </ul>
     </div>
 
-    <!-- 글 작성 버튼 -->
-    <div class="text-right mt-4">
-        <a href="/post/new" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">글 작성</a>
+    <!-- 작성 버튼 -->
+    <div class="flex justify-end space-x-4 mt-5">
+        <!-- 전체공지 작성 버튼 -->
+        <div th:if="${loginDTO.Role} == 'ADMIN'">
+            <a th:href="@{/board/register(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}" th:if="${pageRequestDTO.category != null}" class="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">공지 작성</a>
+        </div>
+        <!-- 글 작성 버튼 -->
+        <div th:if="${loginDTO.Role == 'MANAGER' or loginDTO.Role == 'USER'}">
+            <a th:href="@{/board/register(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}" th:if="${pageRequestDTO.category != null}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">글 작성</a>
+        </div>
     </div>
+
+    <!-- 페이징 -->
+    <div class="mt-3 flex justify-center items-center space-x-2 mb-3">
+        <!-- 이전 버튼 -->
+        <a href="#"
+           class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+           th:if="${result.prev}"
+           th:href="@{/board/list(page=${result.start - 1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}">
+            &lt; <!-- "<" 아이콘 -->
+        </a>
+
+        <!-- 페이지 번호 -->
+        <a href="#"
+           class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+           th:classappend="${result.page == page ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'}"
+           th:each="page : ${result.pageList}"
+           th:href="@{/board/list(page=${page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}">
+            [[${page}]]
+        </a>
+
+        <!-- 다음 버튼 -->
+        <a href="#"
+           class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+           th:if="${result.next}"
+           th:href="@{/board/list(page=${result.end + 1}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}">
+            &gt; <!-- ">" 아이콘 -->
+        </a>
+    </div>
+
 </main>
 </html>
+

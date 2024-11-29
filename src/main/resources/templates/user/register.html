@@ -1,23 +1,77 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
 <div th:replace="assets/topbar :: setContent('')"></div>
 <main class="container mx-auto mt-8">
     <div class="bg-white shadow-md rounded p-6">
         <h2 class="text-2xl font-bold text-center mb-4">회원가입</h2>
-        <form>
+        <form id="signupForm" th:action="@{/user/register}" method="post">
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="email">이메일</label>
-                <input type="email" id="email" class="w-full border rounded p-2" placeholder="이메일을 입력하세요" required>
+                <div class="flex space-x-2">
+                    <input type="email" name="email" id="email" class="flex-grow border rounded p-2" placeholder="이메일을 입력하세요" required>
+                    <button type="button" id="checkEmail" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-32">중복확인</button>
+                </div>
+                <p id="emailError" class="text-red-600 text-sm hidden">올바른 이메일 형식을 입력하세요.</p>
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2" for="username">사용자 이름</label>
-                <input type="text" id="username" class="w-full border rounded p-2" placeholder="사용자 이름을 입력하세요" required>
-            </div>
+
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="password">비밀번호</label>
-                <input type="password" id="password" class="w-full border rounded p-2" placeholder="비밀번호를 입력하세요" required>
+                <input type="password" name="password" id="password" class="w-full border rounded p-2" placeholder="비밀번호를 입력하세요" required>
+                <p id="passwordError" class="text-red-600 text-sm hidden">비밀번호는 알파벳 소문자, 숫자, 특수문자를 포함해야 합니다.</p>
             </div>
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full">
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="passwordConfirmation">비밀번호 확인</label>
+                <input type="password" name="passwordConfirmation" id="repassword" class="w-full border rounded p-2" placeholder="비밀번호를 다시 입력하세요" required>
+                <p id="repasswordError" class="text-red-600 text-sm hidden">비밀번호가 일치하지 않습니다.</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="number">핸드폰 번호</label>
+                <input type="text" name="number" id="number" class="w-full border rounded p-2" placeholder="전화번호를 입력하세요" required>
+                <p id="numberError" class="text-red-600 text-sm hidden">숫자만 입력해야 합니다.</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="nickName">닉네임</label>
+                <div class="flex space-x-2">
+                    <input type="text" name="nickName" id="nickname" class="w-full border rounded p-2" placeholder="닉네임을 입력하세요" required>
+                    <button type="button" id="checkNickname" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-32">중복확인</button>
+                </div>
+                <p id="nickNameError" class="text-red-600 text-sm hidden">닉네임은 10자를 초과하면 안됩니다.</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="name">이름</label>
+                <input type="text" name="name" id="name" class="w-full border rounded p-2" placeholder="이름을 입력하세요" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="major">학과</label>
+                <select name="major" id="major" class="w-full border rounded p-2" required>
+                    <option value="" disabled selected>학과를 선택하세요</option>
+                    <option th:each="dto : ${dtoList}" th:value="${dto.name}" th:text="${dto.name}"></option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="position">직책</label>
+                <select name="position" id="position" class="w-full border rounded p-2" required>
+                    <option value="" disabled selected>직책을 선택하세요</option>
+                    <option value="Student">학생</option>
+                    <option value="Professor">교수</option>
+                    <option value="Staff">교직원</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="address">주소</label>
+                <input type="text" name="address" id="address" class="w-full border rounded p-2" placeholder="주소를 입력하세요" required>
+            </div>
+
+            <button type="submit" id="submitBtn" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full disabled:opacity-50 disabled:cursor-not-allowed">
                 회원가입
             </button>
         </form>
@@ -26,4 +80,173 @@
         </p>
     </div>
 </main>
+
+<script>
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const repasswordInput = document.getElementById('repassword');
+    const numberInput = document.getElementById('number');
+    const nicknameInput = document.getElementById('nickname');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailCheckBtn = document.getElementById("checkEmail")
+    const nickNameCheckBtn = document.getElementById("checkNickname")
+
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const repasswordError = document.getElementById('repasswordError');
+    const numberError = document.getElementById('numberError');
+    const nickError = document.getElementById('nickNameError');
+
+    function validateForm() {
+            let valid = true;
+            // 이메일 검증
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (emailInput.value.length === 0) {
+                valid = false;
+            } else if (!emailPattern.test(emailInput.value)) {
+                emailError.textContent = "유효하지 않은 이메일 형식입니다.";
+                emailError.classList.remove('hidden');
+                valid = false;
+            } else {
+                emailError.classList.add('hidden');
+            }
+
+            // 비밀번호 검증
+            const passwordPattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z]).{8,}$/;
+            if (passwordInput.value.length === 0) {
+                valid = false;
+            } else if (!passwordPattern.test(passwordInput.value)) {
+                passwordError.textContent = "비밀번호는 소문자, 숫자, 특수문자를 포함해야 합니다.";
+                passwordError.classList.remove('hidden');
+                valid = false;
+            } else {
+                passwordError.classList.add('hidden');
+            }
+
+            // 비밀번호 확인
+            if (repasswordInput.value.length === 0) {
+                valid = false;
+            } else if (passwordInput.value !== repasswordInput.value) {
+                repasswordError.textContent = "비밀번호가 일치하지 않습니다.";
+                repasswordError.classList.remove('hidden');
+                valid = false;
+            } else {
+                repasswordError.classList.add('hidden');
+            }
+
+            // 핸드폰 번호 검증
+            const numberPattern = /^[0-9]+$/;
+            if (numberInput.value.length === 0) {
+                valid = false;
+            } else if (!numberPattern.test(numberInput.value)) {
+                numberError.textContent = "전화번호는 숫자만 입력해야 합니다.";
+                numberError.classList.remove('hidden');
+                valid = false;
+            } else {
+                numberError.classList.add('hidden');
+            }
+
+            // 닉네임 검증 (10자 제한)
+            if (nicknameInput.value.length === 0) {
+                valid = false;
+            } else if (nicknameInput.value.length > 10) {
+                nickError.textContent = "닉네임은 10자를 초과할 수 없습니다.";
+                nickError.classList.remove('hidden');
+                valid = false;
+            } else {
+                nickError.classList.add('hidden');
+            }
+
+            // 모든 필드 검증
+            submitBtn.disabled = (!valid && emailCheckBtn.disabled && nickNameCheckBtn);
+
+    }
+
+    // 입력 이벤트가 발생할 때마다 폼 검증 실행
+    document.getElementById('signupForm').addEventListener('input', validateForm);
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const singupResult = /*[[${singupresult}]]*/ '';
+
+        // 값이 존재하면 alert 창 띄우기
+        if (singupResult) {
+            alert(singupResult);
+        }
+    });
+
+    document.getElementById('checkEmail').addEventListener('click', () => {
+        const email = document.getElementById('email').value;
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/api/user/emailcheck', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken // CSRF 토큰 추가
+            },
+            body: JSON.stringify({ email }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        return response.json().then((errorData) => {
+                            alert(errorData.message  || "에러 메시지가 없습니다."); // body가 없을 경우 대비
+                        });
+                    }
+                    else{
+                    alert("서버 오류입니다. 관리자에게 문의해주세요")
+                    }
+                }
+                document.getElementById('email').disabled = true;
+                emailCheckBtn.disabled=true;
+                return response.json();
+            })
+            .then((data) => {
+                alert(data.message)
+            })
+            .catch((error) => {
+            });
+    });
+
+    document.getElementById('checkNickname').addEventListener('click', () => {
+        const nickName = document.getElementById('nickname').value;
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/api/user/nicknamecheck', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken // CSRF 토큰 추가
+            },
+            body: JSON.stringify({ nickName }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        return response.json().then((errorData) => {
+                            alert(errorData.message  || "에러 메시지가 없습니다."); // body가 없을 경우 대비
+                        });
+                    }
+                    else{
+                        alert("서버 오류입니다. 관리자에게 문의해주세요")
+                    }
+                }
+                document.getElementById('nickname').disabled = true;
+                nickNameCheckBtn.disabled=true;
+                return response.json();
+            })
+            .then((data) => {
+                alert(data.message)
+            })
+            .catch((error) => {
+
+            });
+    });
+
+    validateForm();
+</script>
+</body>
 </html>

@@ -1,9 +1,6 @@
 package aikopo.ac.kr.polyboard.service.service.Imp;
 
-import aikopo.ac.kr.polyboard.dto.BoardDTO;
-import aikopo.ac.kr.polyboard.dto.MajorListDTO;
-import aikopo.ac.kr.polyboard.dto.PageRequestDTO;
-import aikopo.ac.kr.polyboard.dto.PageResultDTO;
+import aikopo.ac.kr.polyboard.dto.*;
 import aikopo.ac.kr.polyboard.entity.Board;
 import aikopo.ac.kr.polyboard.entity.Major;
 import aikopo.ac.kr.polyboard.entity.Member;
@@ -18,6 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,14 +39,48 @@ public class BoardServiceImp implements BoardService {
     private final ReplyRepository replyRepository;
 
     @Override
-    public String register(BoardDTO dto) {
-        Board board = dtoToEntity(dto);
-        boardRepository.save(board);
-        return board.getTitle();
+    public Long register(BoardDTO dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 인증되지 않은 상태 처리
+        if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String userName = ((UserDetails) principal).getUsername();
+            Optional<Member> memberOptional = memberRepository.findByEmail(userName);
+            Member member = memberOptional.orElseThrow(() ->
+                    new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userName));
+
+            Optional<Major> majorOptional = majorRepository.findByName(dto.getBoardMajor());
+            Major major = majorOptional.orElseThrow(() -> new IllegalArgumentException("보드를 찾을 수 없습니다: " + dto.getBoardMajor()));
+            Board board = Board.builder()
+                    .title(dto.getTitle())
+                    .content(dto.getContent())
+                    .member(member)
+                    .major(major)
+                    .likes(0)
+                    .disLikes(0)
+                    .departmentNotice(dto.getDepartmentNotice())
+                    .allNotice(Boolean.FALSE)
+                    .build();
+            boardRepository.save(board);
+            return board.getId();
+        }
+        throw new AccessDeniedException("접근 권한이 없습니다.");
     }
 
     @Override
     public PageResultDTO<BoardDTO, Object[]> getDepartmentList(PageRequestDTO pageRequestDTO) {
+        if (pageRequestDTO.getCategory() == null){
+            throw new IllegalArgumentException("존재하지 않는 게시판입니다.");
+        }
+        if (pageRequestDTO.getCategory().isEmpty()) {
+                return getAllBoards(pageRequestDTO);
+
+        }
 
         if (pageRequestDTO.getCategory() != null && !pageRequestDTO.getCategory().isEmpty() && !majorRepository.existsByName(pageRequestDTO.getCategory())) {
             if (pageRequestDTO.getCategory().equals("핫글")){
@@ -105,6 +140,27 @@ public class BoardServiceImp implements BoardService {
         return new PageResultDTO<>(pageResult, fn); // 변환 함수 전달
     }
 
+//    @Override
+    public PageResultDTO<BoardDTO, Object[]> getAllBoards(PageRequestDTO pageRequestDTO) {
+        List<Board> allNotices = boardRepository.findAll();
+
+
+        List<Object[]> objectArrayList = allNotices.stream()
+                .map(board -> new Object[]{board}) // Object[]로 변환
+                .collect(Collectors.toList());
+
+        int page = pageRequestDTO.getPage() - 1; // JPA Pageable은 0-based index
+        int size = pageRequestDTO.getSize();
+        int start = page * size;
+        int end = Math.min((start + size), objectArrayList.size()); // 끝 인덱스 계산
+        List<Object[]> pagedList = objectArrayList.subList(start, end);
+        Page<Object[]> pageResult = new PageImpl<>(pagedList, PageRequest.of(page, size), objectArrayList.size());
+
+        Function<Object[], BoardDTO> fn = (en -> entityToDTO((Board) en[0]));
+
+        return new PageResultDTO<>(pageResult, fn); // 변환 함수 전달
+    }
+
     @Override
     public BoardDTO get(Long id) {
         Optional<Board> result = boardRepository.findById(id);
@@ -133,16 +189,19 @@ public class BoardServiceImp implements BoardService {
     }
 
     @Override
-    public void modify(BoardDTO boardDTO) {
+    public Long modify(BoardDTO boardDTO) {
+
         Board board = boardRepository.getReferenceById(boardDTO.getId());
-        Optional<Major> optionalMajor = majorRepository.findByName(boardDTO.getBoardMajor());
+        Optional<Major> optionalMajor = majorRepository.findByName(board.getMajor().getName());
+
         Major major = optionalMajor.orElseThrow(() -> new IllegalArgumentException("Major not found with BoardMajor: " + boardDTO.getBoardMajor()));
 
         board.changeTitle(boardDTO.getTitle());
+
         board.changeContent(boardDTO.getContent());
-        board.changeMajor(major);
 
         boardRepository.save(board);
+        return board.getId();
     }
 
     public BoardDTO entityToDTO(Board board){
@@ -173,7 +232,6 @@ public class BoardServiceImp implements BoardService {
 
         Optional<Major> optionalMajor = majorRepository.findByName(dto.getBoardMajor());
         Major major = optionalMajor.orElseThrow(() -> new IllegalArgumentException("Major not found with BoardMajor: " + dto.getBoardMajor()));
-
         Board board= Board.builder()
                 .id(dto.getId())
                 .title(dto.getTitle())

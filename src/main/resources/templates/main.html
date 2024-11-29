@@ -2,60 +2,133 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <div th:replace="assets/topbar :: setContent('')"></div>
 <main class="container mx-auto mt-8">
-<div class="container mx-auto p-4">
-    <!-- 상단: 공지사항과 핫 글 목록 -->
-    <div class="flex space-x-4">
-        <!-- 공지사항 -->
-        <div class="flex-1 bg-white rounded-lg shadow-md p-4">
-            <h2 class="text-xl font-bold text-blue-600 mb-4"><a th:href="@{/board/list(category='공지')}">공지사항</a></h2>
-            <ul class="divide-y">
-                <li class="py-2" th:each="dto : ${model.allNotices}">
-                    <a th:href="@{/board/read(id=${dto.id})}" class="flex justify-between items-center">
-                        <!-- 제목 -->
-                        <span th:text="${dto.title}" class="text-black-700 font-semibold truncate"></span>
-                        <!-- 작성자 -->
-                        <span th:text="${dto.writerName}" class="text-gray-500 text-sm ml-4"></span>
-                    </a>
-                </li>
-            </ul>
+    <div class="container mx-auto p-4">
+        <!-- 상단: 공지사항과 핫 글 목록 -->
+        <div class="flex space-x-4">
+            <!-- 공지사항 -->
+            <div class="flex-1 bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-xl font-bold text-blue-600 mb-4"><a th:href="@{/board/list(category='공지')}">공지사항</a></h2>
+                <ul id="noticeList" class="divide-y">
+                    <!-- JavaScript에서 데이터를 동적으로 추가 -->
+                </ul>
+            </div>
+
+            <!-- 핫 글 목록 -->
+            <div class="flex-1 bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-xl font-bold text-red-600 mb-4"><a th:href="@{/board/list(category='핫글')}">핫 글</a></h2>
+                <ul id="hotBoardList" class="divide-y">
+                    <!-- JavaScript에서 데이터를 동적으로 추가 -->
+                </ul>
+            </div>
         </div>
 
-        <!-- 핫 글 목록 -->
-        <div class="flex-1 bg-white rounded-lg shadow-md p-4">
-            <h2 class="text-xl font-bold text-red-600 mb-4"><a th:href="@{/board/list(category='핫글')}">핫 글</a></h2>
-            <ul class="divide-y">
-                <li class="py-2" th:each="dto : ${model.hotNotices}">
-                    <a th:href="@{/board/read(id=${dto.id})}" class="flex justify-between items-center">
-                        <!-- 제목 -->
-                        <span th:text="${dto.title}" class="text-black-700 font-semibold truncate"></span>
-                        <!-- 작성자 -->
-                        <span th:text="${dto.writerName}+ ' | '+${dto.writerMajor}" class="text-gray-500 text-sm ml-4"></span>
-                        <!-- 추천수 -->
-                        <span th:text="'추천수: '+${dto.likes}" class="text-gray-500 text-sm ml-4"></span>
-                    </a>
-                </li>
+        <!-- 하단: 일반 글 목록 -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-xl font-bold text-blue-700 mb-4" th:unless="${loginDTO.login}" ><a th:href="@{/board/list(category='')}" th:value="${login}">전체 학과 게시판</a></h2>
+            <h2 class="text-xl font-bold text-blue-700 mb-4" th:if="${loginDTO.login}">
+                <a th:href="@{/board/list(category=${loginDTO.major})}" th:text="${loginDTO.major} + ' 게시판'"></a>
+            </h2>
+            <ul id="majorBoardList" class="divide-y">
+                <!-- JavaScript에서 데이터를 동적으로 추가 -->
             </ul>
         </div>
     </div>
 
-    <!-- 하단: 일반 글 목록 -->
-    <div class="mt-6 bg-white rounded-lg shadow-md p-4">
-        <h2 class="text-xl font-bold text-blue-700 mb-4"><a th:href="@{/board/list}">학과 게시판</a></h2>
-        <ul class="divide-y">
-            <li class="py-2" th:each="dto : ${model.majorBoards}">
-                <a th:href="@{/board/read(id=${dto.id})}" class="flex justify-between items-center">
-                    <!-- 제목 -->
-                    <span th:text="${dto.title}" class="text-black-700 font-semibold truncate"></span>
-                    <!-- 작성자 -->
-                    <span th:text="${dto.writerName}+ ' | '+${dto.writerMajor}" class="text-gray-500 text-sm ml-4"></span>
-                    <!-- 추천수 -->
-                    <span th:text="'추천수: '+${dto.likes}" class="text-gray-500 text-sm ml-4"></span>
-                    <!-- 등록일자 -->
-                    <span th:text="${#temporals.format(dto.regDate, 'yyyy.MM.dd HH:mm')}" class="text-gray-500 text-sm ml-4"></span>
-                </a>
-            </li>
-        </ul>
-    </div>
-</div>
 </main>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginDTO = /*[[${loginDTO}]]*/ {};
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // 공지사항 리스트 로드
+        fetch('/api/main/getNoticeList', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const noticeList = document.getElementById('noticeList');
+                data.forEach((dto) => {
+                    const li = document.createElement('li');
+                    li.className = 'py-2';
+                    li.innerHTML = `
+                      <a href="/board/read?id=${dto.id}" class="flex justify-between items-center">
+                        <span class="text-black-700 font-semibold truncate">${dto.title}</span>
+                        <span class="text-gray-500 text-sm ml-4">${dto.writerName}</span>
+                      </a>
+                    `;
+                    noticeList.appendChild(li);
+                });
+            });
+
+        // 핫 글 리스트 로드
+        fetch('/api/main/getHotBoardList', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const hotBoardList = document.getElementById('hotBoardList');
+                data.forEach((dto) => {
+                    const li = document.createElement('li');
+                    li.className = 'py-2';
+                    li.innerHTML = `
+                      <a href="/board/read?id=${dto.id}" class="flex justify-between items-center">
+                        <span class="text-black-700 font-semibold truncate">${dto.title}</span>
+                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.writerMajor} | ${dto.boardMajor} 게시판</span>
+                        <span class="text-gray-500 text-sm ml-4">추천수: ${dto.likes}</span>
+                      </a>
+                    `;
+                    hotBoardList.appendChild(li);
+                });
+            });
+
+        // 학과 게시판 리스트 로드
+        console.log(loginDTO.major)
+        fetch('/api/main/MyBoardList', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify({ major: loginDTO.major }), // 학과 정보를 전달
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const majorBoardList = document.getElementById('majorBoardList');
+                data.forEach((dto) => {
+                    const li = document.createElement('li');
+                    const options = {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    };
+
+                    li.className = 'py-2';
+                    li.innerHTML = `
+                      <a href="/board/read?id=${dto.id}" class="flex justify-between items-center">
+                        <span class="text-black-700 font-semibold truncate">${dto.title}</span>
+                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.writerMajor}</span>
+                        <span class="text-gray-500 text-sm ml-4">추천수: ${dto.likes}</span>
+                        <span class="text-gray-500 text-sm ml-4">${new Date(dto.regDate).toLocaleTimeString('ko-KR', options)}</span>
+                      </a>
+                    `;
+                    majorBoardList.appendChild(li);
+                });
+            });
+    });
+</script>
+
+
 </html>

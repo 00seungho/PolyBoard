@@ -4,14 +4,14 @@
 <main class="container mx-auto mt-8">
     <div class="bg-white shadow-md rounded p-6">
         <h2 class="text-2xl font-bold text-center mb-4">로그인</h2>
-        <form>
+        <form th:action="@{/user/login}" method="post">
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2" for="email">이메일</label>
-                <input type="email" id="email" class="w-full border rounded p-2" placeholder="이메일을 입력하세요" required>
+                <label class="block text-gray-700 font-bold mb-2" for="userEmail">이메일</label>
+                <input type="email" id="userEmail" name="username" class="w-full border rounded p-2" placeholder="이메일을 입력하세요" required>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="password">비밀번호</label>
-                <input type="password" id="password" class="w-full border rounded p-2" placeholder="비밀번호를 입력하세요" required>
+                <input type="password" id="password" name="password" class="w-full border rounded p-2" placeholder="비밀번호를 입력하세요" required>
             </div>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full">
                 로그인
@@ -21,5 +21,15 @@
             계정이 없으신가요? <a href="/signup" class="text-blue-600 hover:underline">회원가입</a>
         </p>
     </div>
+    <input type="hidden" th:value="${result}" id="message">
 </main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const singupResult = document.getElementById("message").val
+        // 값이 존재하면 alert 창 띄우기
+        if (singupResult) {
+            alert(singupResult);
+        }
+    });
+</script>
 </html>

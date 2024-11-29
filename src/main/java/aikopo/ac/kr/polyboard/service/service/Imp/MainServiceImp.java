@@ -1,7 +1,6 @@
 package aikopo.ac.kr.polyboard.service.service.Imp;
 
 import aikopo.ac.kr.polyboard.dto.BoardDTO;
-import aikopo.ac.kr.polyboard.dto.mainDTO.MainSearchDTO;
 import aikopo.ac.kr.polyboard.entity.Board;
 import aikopo.ac.kr.polyboard.entity.Member;
 import aikopo.ac.kr.polyboard.repository.BoardRepository;
@@ -54,32 +53,43 @@ public class MainServiceImp implements MainService {
     }
 
     @Override
-    public MainSearchDTO getMainList() {
-        String major="전기과";
-        Pageable pageable = PageRequest.of(0, 10); // 첫 번째 페이지, 10개씩
-
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+    public List<BoardDTO> getNoticeList() {
         List<Board> allNotices = boardRepository.findTop10ByAllNoticeTrueOrderByIdDesc();
-        List<Board> hotBoards = boardRepository.findByLikesInLastWeek(oneWeekAgo,pageable);
-        List<Board> Boards = boardRepository.findByMajorNameExcludingNotices(major,pageable);
-
         List<BoardDTO> allNoticesDTO = allNotices.stream()
                 .map(board -> entityToDTO(board))
                 .collect(Collectors.toList());
 
+        return allNoticesDTO;
+    }
+
+    @Override
+    public List<BoardDTO> getHotBoardList() {
+        Pageable pageable = PageRequest.of(0, 10); // 첫 번째 페이지, 10개씩
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+        List<Board> hotBoards = boardRepository.findByLikesInLastWeek(oneWeekAgo,pageable);
         List<BoardDTO> hotBoardsDTO = hotBoards.stream()
                 .map(board -> entityToDTO(board))
                 .collect(Collectors.toList());
-
-        List<BoardDTO> boardsDTO = Boards.stream()
-                .map(board -> entityToDTO(board))
-                .collect(Collectors.toList());
-
-        MainSearchDTO mainSearchDTO = new MainSearchDTO(allNoticesDTO,hotBoardsDTO,boardsDTO,major);
-        return mainSearchDTO;
+        return hotBoardsDTO;
     }
 
+    @Override
+    public List<BoardDTO> getMyBoardList(String major) {
+        if(major==null){
+            List<Board> Boards = boardRepository.findTop10ByOrderByIdDesc();
+            List<BoardDTO> BoardDTOs = Boards.stream()
+                    .map(board -> entityToDTO(board))
+                    .collect(Collectors.toList());
+            return BoardDTOs;
+        }
 
+        Pageable pageable = PageRequest.of(0, 10); // 첫 번째 페이지, 10개씩
+        List<Board> Boards = boardRepository.findByMajorNameExcludingNotices(major,pageable);
+        List<BoardDTO> BoardDTOs = Boards.stream()
+                .map(board -> entityToDTO(board))
+                .collect(Collectors.toList());
+            return BoardDTOs;
+    }
 
 
 }

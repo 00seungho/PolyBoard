@@ -1,10 +1,7 @@
 package aikopo.ac.kr.polyboard.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Builder
@@ -44,8 +41,8 @@ public class Board extends BaseTime{
         this.major = major;
     }
 
-    public void changeContent(String title){
-        this.title = title;
+    public void changeContent(String content){
+        this.content = content;
     }
 
 }

@@ -31,6 +31,7 @@ public class PageResultDTO<DTO, EN> {
     //    한 화면에 보여질 페이지 번호 목록이 저장
     private List<Integer> pageList;
 
+
     public PageResultDTO(Page<EN> result, Function<EN, DTO> fn){
 //        매개변수로 전달받은 결과행들과 Entity를 DTO로 변환한 fn을 사용해서 BoardDTO객체를 저장한 리스트
         dtoList = result.stream().map(fn).collect(Collectors.toList());

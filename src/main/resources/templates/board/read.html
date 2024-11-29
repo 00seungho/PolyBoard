@@ -9,8 +9,9 @@
         </p>
         <h2 class="text-2xl font-bold" th:text="${dto.title}"></h2>
         <p class="text-gray-500 text-sm"
-           th:text="'작성자: ' + ${dto.writerName} + ' | '+ ${dto.writerMajor} + ' | ' + ${#temporals.format(dto.regDate, 'yyyy.MM.dd HH:mm')}">
+           th:text="'작성자: ' + ${dto.writerName} + ' | '+ ${dto.writerMajor} + ' | '+'작성일: '+ ${#temporals.format(dto.regDate, 'yyyy.MM.dd HH:mm')} + (${dto.modDate != dto.regDate} ? ' | 수정일: ' + ${#temporals.format(dto.modDate, 'yyyy.MM.dd HH:mm')} : '')">
         </p>
+
 
 
         <p class="mt-4 text-gray-800" th:text="${dto.content}"></p>
@@ -50,9 +51,33 @@
         </form>
     </div>
 
-    <!-- 뒤로가기 버튼 -->
-    <div class="text-right mt-4">
-        <a href="/" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">목록으로</a>
+    <!-- 뒤로가기 및 수정 버튼 -->
+    <div class="text-right mt-4 flex justify-end space-x-4">
+        <div class="text-right mt-4 flex justify-end space-x-4">
+            <!-- 삭제하기 버튼 -->
+            <form th:action="@{/board/remove}" method="post" th:if="${loginDTO.Role} == 'MANAGER' or ${loginDTO.Role} == 'ADMIN' or ${dto.writerName} == ${loginDTO.nickName}"
+                  th:object="${dto}" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                <input type="hidden" name="id" th:value="${dto.id}">
+                <input type="hidden" name="page" th:value="${requestDTO.page}">
+                <input type="hidden" name="type" th:value="${requestDTO.type}">
+                <input type="hidden" name="keyword" th:value="${requestDTO.keyword}">
+                <input type="hidden" name="category" th:value="${requestDTO.category}">
+                <button type="submit" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
+                    삭제하기
+                </button>
+            </form>
+            <!-- 수정하기 버튼 -->
+            <a th:if=" ${dto.writerName} == ${loginDTO.nickName}" th:href="@{/board/modify(id=${dto.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}"
+               class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                수정하기
+            </a>
+            <!-- 목록으로 버튼 -->
+            <a th:href="@{/board/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}"
+               class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                목록으로
+            </a>
+        </div>
+
     </div>
 </main>
 </html>

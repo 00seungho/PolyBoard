@@ -29,7 +29,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     //전체 글중 일주일간 가장 추천수가 많고 공지사항이 아닌 게시글 10개
     @Query("SELECT b FROM Board b " +
-            "WHERE b.allNotice = false AND b.departmentNotice = false " +
+            "WHERE b.allNotice = false " +
             "AND b.regDate >= :startDate " +
             "ORDER BY b.likes DESC")
     List<Board> findByLikesInLastWeek(@Param("startDate") LocalDateTime startDate, Pageable pageable);
@@ -37,11 +37,14 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     //모든 공지 중 10개만
     List<Board> findTop10ByAllNoticeTrueOrderByIdDesc();
 
-    //모든 게시물중 10개만
+    //모든 게시물중 특정 게시판 10개만
     @Query("SELECT b FROM Board b " +
             "WHERE b.major.name = :majorName " +
-            "AND (b.allNotice = false AND b.departmentNotice = false) " +
+            "AND (b.allNotice = false) " +
             "ORDER BY b.id DESC")
     List<Board> findByMajorNameExcludingNotices(@Param("majorName") String majorName, Pageable pageable);
+
+    //모든 게시물중 10개만
+    List<Board> findTop10ByOrderByIdDesc();
 
 }
