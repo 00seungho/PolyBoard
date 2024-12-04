@@ -58,6 +58,11 @@ public class BoardController {
         model.addAttribute("dtoList",userService.getMajorDtoList());
     }
 
+    @GetMapping( "/noticeregister")
+    public void noticeRegister(Model model, PageRequestDTO requestDTO){
+        model.addAttribute("requestDTO",requestDTO);
+    }
+
     @PostMapping( "/register")
     public String registerPost(BoardDTO dto, @ModelAttribute PageRequestDTO requestDTO, RedirectAttributes redirectAttributes){
         Long id = boardService.register(dto);
@@ -84,11 +89,10 @@ public class BoardController {
         redirectAttributes.addAttribute("keyword", requestDTO.getKeyword() != null ? requestDTO.getKeyword() : ""); // 빈 문자열
         redirectAttributes.addAttribute("category", requestDTO.getCategory() != null ? requestDTO.getCategory() : ""); // 빈 문자열
         return "redirect:/board/list";
-    }
+   }
 
     @GetMapping( "/modify")
     public void modify(Long id, PageRequestDTO requestDTO,Model model){
-        log.info("★★");
         BoardDTO boardDTO = boardService.get(id);
         model.addAttribute("dto",boardDTO);
         model.addAttribute("requestDTO",requestDTO);

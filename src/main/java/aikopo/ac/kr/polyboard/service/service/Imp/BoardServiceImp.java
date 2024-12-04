@@ -2,12 +2,10 @@ package aikopo.ac.kr.polyboard.service.service.Imp;
 
 import aikopo.ac.kr.polyboard.dto.*;
 import aikopo.ac.kr.polyboard.entity.Board;
+import aikopo.ac.kr.polyboard.entity.LikeDislike;
 import aikopo.ac.kr.polyboard.entity.Major;
 import aikopo.ac.kr.polyboard.entity.Member;
-import aikopo.ac.kr.polyboard.repository.BoardRepository;
-import aikopo.ac.kr.polyboard.repository.MajorRepository;
-import aikopo.ac.kr.polyboard.repository.MemberRepository;
-import aikopo.ac.kr.polyboard.repository.ReplyRepository;
+import aikopo.ac.kr.polyboard.repository.*;
 import aikopo.ac.kr.polyboard.service.service.Interface.BoardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -32,12 +30,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class BoardServiceImp implements BoardService {
+public class BoardServiceImp extends BaseService implements BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final MajorRepository majorRepository;
     private final ReplyRepository replyRepository;
-
+    private final LikeDislikeRepository likeDislikeRepository;
     @Override
     public Long register(BoardDTO dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -64,7 +62,7 @@ public class BoardServiceImp implements BoardService {
                     .likes(0)
                     .disLikes(0)
                     .departmentNotice(dto.getDepartmentNotice())
-                    .allNotice(Boolean.FALSE)
+                    .allNotice(dto.getAllNotice())
                     .build();
             boardRepository.save(board);
             return board.getId();
@@ -142,9 +140,7 @@ public class BoardServiceImp implements BoardService {
 
 //    @Override
     public PageResultDTO<BoardDTO, Object[]> getAllBoards(PageRequestDTO pageRequestDTO) {
-        List<Board> allNotices = boardRepository.findAll();
-
-
+        List<Board> allNotices = boardRepository.findAllByOrderByIdDesc();
         List<Object[]> objectArrayList = allNotices.stream()
                 .map(board -> new Object[]{board}) // Object[]로 변환
                 .collect(Collectors.toList());
@@ -165,8 +161,6 @@ public class BoardServiceImp implements BoardService {
     public BoardDTO get(Long id) {
         Optional<Board> result = boardRepository.findById(id);
         Board board = result.orElseThrow(() -> new IllegalArgumentException("Board not found with id: " + id));
-//        Member member = board.getMember();
-//        Long replyCount = replyRepository.countByBoard_Id(id);
         BoardDTO dto = entityToDTO(board);
         return dto;
     }
@@ -182,26 +176,61 @@ public class BoardServiceImp implements BoardService {
 
     @Override
     @Transactional
+    public void addLike(LikeDislikeDTO likeDislikeDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("인증되지 않은 사용자입니다.");
+        }
+        Object principal = authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) principal;
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new IllegalArgumentException("회원 조회 오류"));
+        Optional<LikeDislike> existing = likeDislikeRepository.findByMemberIdAndBoardId(member.getId(), likeDislikeDTO.getBoardId());
+        if (existing.isPresent()) {
+            // 이미 좋아요/싫어요를 누른 경우 상태를 업데이트
+            LikeDislike likeDislike = existing.get();
+            likeDislike.changeLikeStatus(likeDislikeDTO.getLikeStatus());
+            likeDislikeRepository.save(likeDislike);
+        } else {
+            // 처음 누르는 경우
+            LikeDislike likeDislike = LikeDislike.builder()
+                    .member(member)
+                    .board(Board.builder().id(likeDislikeDTO.getBoardId()).build())   // Board 객체 생성
+                    .likeStatus(likeDislikeDTO.getLikeStatus())
+                    .build();
+            likeDislikeRepository.save(likeDislike);
+        }
+        boardRepository.updateLikesAndDislikes(likeDislikeDTO.getBoardId());
+    }
+
+
+    @Override
+    @Transactional
     public void removeWithReplies(Long id) {
-        replyRepository.deleteById(id);
-//        원글삭제
-        boardRepository.deleteById(id);
+        Board board = boardRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Board not found with id: " + id));
+        List<String> role = getRole();
+        if(checkAuthorize(board.getMember().getEmail()) || role.contains("ROLE_ADMIN"))
+        {
+            likeDislikeRepository.deleteByBoardId(id);
+            replyRepository.deleteByBoardId(id);
+    //        원글삭제
+            boardRepository.deleteById(id);
+        }
     }
 
     @Override
     public Long modify(BoardDTO boardDTO) {
-
         Board board = boardRepository.getReferenceById(boardDTO.getId());
-        Optional<Major> optionalMajor = majorRepository.findByName(board.getMajor().getName());
-
-        Major major = optionalMajor.orElseThrow(() -> new IllegalArgumentException("Major not found with BoardMajor: " + boardDTO.getBoardMajor()));
-
+        if(checkAuthorize(board.getMember().getEmail())){
         board.changeTitle(boardDTO.getTitle());
 
         board.changeContent(boardDTO.getContent());
 
         boardRepository.save(board);
         return board.getId();
+        }
+        else{
+            throw new AccessDeniedException("접근권한이 없습니다.");
+        }
     }
 
     public BoardDTO entityToDTO(Board board){

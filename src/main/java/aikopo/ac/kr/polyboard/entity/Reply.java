@@ -18,11 +18,15 @@ public class Reply extends BaseTime{
 
     private String content;
 
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id")
+    @ManyToOne()
+    @JoinColumn(name = "board_id", referencedColumnName = "id")
     private Board board;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(referencedColumnName = "id")
     private Member member;
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }

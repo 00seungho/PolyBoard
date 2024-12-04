@@ -8,9 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+
 @Builder
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
 public class PageRequestDTO {
     private int page;
     private int size;

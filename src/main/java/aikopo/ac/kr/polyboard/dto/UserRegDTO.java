@@ -2,11 +2,11 @@ package aikopo.ac.kr.polyboard.dto;
 
 import lombok.*;
 
-@Data
-@ToString
 @Builder
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class UserRegDTO {
     String email;
     String password;

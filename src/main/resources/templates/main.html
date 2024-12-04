@@ -83,7 +83,7 @@
                     li.innerHTML = `
                       <a href="/board/read?id=${dto.id}" class="flex justify-between items-center">
                         <span class="text-black-700 font-semibold truncate">${dto.title}</span>
-                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.writerMajor} | ${dto.boardMajor} 게시판</span>
+                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.boardMajor} 게시판</span>
                         <span class="text-gray-500 text-sm ml-4">추천수: ${dto.likes}</span>
                       </a>
                     `;
@@ -119,7 +119,7 @@
                     li.innerHTML = `
                       <a href="/board/read?id=${dto.id}" class="flex justify-between items-center">
                         <span class="text-black-700 font-semibold truncate">${dto.title}</span>
-                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.writerMajor}</span>
+                        <span class="text-gray-500 text-sm ml-4">${dto.writerName} | ${dto.writerMajor} | ${dto.boardMajor} 게시판</span>
                         <span class="text-gray-500 text-sm ml-4">추천수: ${dto.likes}</span>
                         <span class="text-gray-500 text-sm ml-4">${new Date(dto.regDate).toLocaleTimeString('ko-KR', options)}</span>
                       </a>

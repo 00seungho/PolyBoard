@@ -199,7 +199,7 @@
                     alert("서버 오류입니다. 관리자에게 문의해주세요")
                     }
                 }
-                document.getElementById('email').disabled = true;
+                document.getElementById('email').readOnly = true;
                 emailCheckBtn.disabled=true;
                 return response.json();
             })
@@ -234,7 +234,7 @@
                         alert("서버 오류입니다. 관리자에게 문의해주세요")
                     }
                 }
-                document.getElementById('nickname').disabled = true;
+                document.getElementById('nickname').readOnly = true;
                 nickNameCheckBtn.disabled=true;
                 return response.json();
             })

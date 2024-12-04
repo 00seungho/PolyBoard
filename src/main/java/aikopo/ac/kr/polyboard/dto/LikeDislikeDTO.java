@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 
-public class ReplyDTO {
+public class LikeDislikeDTO {
     private Long id;
-    private String content;
-    private String writer;
     private Long boardId;
-    private LocalDateTime regDate,modDate;
+    private Long memberId;
+    private Boolean likeStatus;
 }

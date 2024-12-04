@@ -27,23 +27,7 @@ public class BoardRepositoryTests {
     @Autowired
     private PageableHandlerMethodArgumentResolver pageableResolver;
 
-    @Test
-    public void insertMajor(){
-//        Major major1 = Major.builder()
-//                .name("인공지능소프트웨어과")
-//                .build();
-//        majorRepository.save(major1);
-//
-//        Major major2 = Major.builder()
-//                .name("전기과")
-//                .build();
-//        majorRepository.save(major2);
 
-        Major major3 = Major.builder()
-                .name("공지")
-                .build();
-        majorRepository.save(major3);
-    }
     @Test
     public void inserMembers(){
         Optional<Major> optionalAI = majorRepository.findByName("인공지능소프트웨어과");

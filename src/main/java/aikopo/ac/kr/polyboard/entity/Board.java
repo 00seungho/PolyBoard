@@ -18,7 +18,7 @@ public class Board extends BaseTime{
     private Integer likes;
     private Integer disLikes;
 
-    private Boolean allNotice;
+    private Boolean allNotice ;
     private Boolean departmentNotice;
 
     @ManyToOne
@@ -28,10 +28,6 @@ public class Board extends BaseTime{
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
     private Major major;
-
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id")
-    private Reply reply;
 
     public void changeTitle(String title){
         this.title = title;

@@ -1,10 +1,7 @@
 package aikopo.ac.kr.polyboard.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
 public class Member extends BaseTime{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +41,21 @@ public class Member extends BaseTime{
     @Enumerated(EnumType.STRING)
     private Position position;
 
-
     public String getRole(){
         return role.toString();
     }
+
+    public void changePhone(String phone){
+        this.phone = phone;
+    }
+
+    public void changeAddress(String address){
+        this.address = address;
+    }
+
+    public void changeNickName(String nickname){
+        this.nickname = nickname;
+    }
+
+
 }

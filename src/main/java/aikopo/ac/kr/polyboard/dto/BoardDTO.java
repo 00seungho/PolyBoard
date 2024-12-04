@@ -4,11 +4,12 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
-@ToString
 @Builder
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
+
 public class BoardDTO {
     private Long id;
     private String title;

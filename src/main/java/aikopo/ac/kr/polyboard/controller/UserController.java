@@ -25,8 +25,7 @@ import java.util.Map;
 @Log4j2
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
     @GetMapping("/")
     public String redirectToLogin() {
@@ -51,11 +50,18 @@ public class UserController {
     }
 
     @GetMapping("/usermodify")
-    public void userModify(){
+    public void userModify(Model model){
+        model.addAttribute("dto",userService.getMember());
+    }
+    @PostMapping("/usermodify")
+    public String postModify(UserRegDTO userRegDTO){
+        userService.modifyMember(userRegDTO);
+        return "redirect:/user/userprofile";
     }
 
     @GetMapping("/userprofile")
-    public void userProfile(){
+    public void userProfile(Model model){
+        model.addAttribute("dto",userService.getMember());
     }
 
     @PostMapping("/register")

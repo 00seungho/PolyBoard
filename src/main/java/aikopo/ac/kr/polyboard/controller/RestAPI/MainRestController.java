@@ -18,8 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MainRestController {
 
-    @Autowired
-    MainService mainService;
+    private final MainService mainService;
 
     @GetMapping("/getNoticeList")
     public List<BoardDTO> getNoticeList() {

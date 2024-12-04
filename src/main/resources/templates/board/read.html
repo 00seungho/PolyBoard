@@ -19,32 +19,46 @@
         <!-- 추천/비추천 버튼 -->
         <div class="flex justify-center items-center mt-6 space-x-8">
             <!-- 추천 버튼 -->
-            <button class="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            <button
+                    class="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                    id="like"
+                    th:disabled="${!loginDTO.login}" >
                 <span class="text-lg">👍</span>
                 <span class="ml-2" th:text="'추천(' + ${dto.likes} + ')'"></span>
             </button>
 
             <!-- 비추천 버튼 -->
-            <button class="flex items-center bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+            <button
+                    class="flex items-center bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                    id="dislike"
+                    th:disabled="${!loginDTO.login}">
                 <span class="text-lg">👎</span>
                 <span class="ml-2" th:text="'비추천(' + ${dto.disLikes} + ')'"></span>
             </button>
-        </div>
     </div>
 
     <!-- 댓글 섹션 -->
     <div class="bg-white shadow-md rounded p-6 mt-6">
-        <h3 class="text-xl font-bold mb-4">댓글</h3>
-        <ul>
-            <li class="border-b py-4">
-                <p class="text-gray-800">좋은 글이네요! 감사합니다.</p>
-                <p class="text-gray-500 text-sm">작성자: 댓글러 | 2024-11-26</p>
-            </li>
+        <h3 class="text-xl font-bold mb-4 flex items-center">
+            댓글
+            <!-- 댓글 개수 표시 -->
+            <span id="replyCount" class="text-sm text-gray-600 ml-2" th:text="'('+${dto.replyCount}+'개)'"></span>
+        </h3>
+        <ul id="replyList">
+            <!-- 댓글 목록이 여기에 동적으로 추가됩니다 -->
         </ul>
+        <!-- 페이지네이션 -->
+        <div id="pagination" class="mt-4 flex justify-center space-x-2">
+            <!-- 페이지 번호가 동적으로 추가됩니다 -->
+        </div>
+    </div>
 
         <!-- 댓글 작성 -->
-        <form class="mt-4">
-            <textarea class="w-full border rounded p-2" rows="3" placeholder="댓글을 작성하세요."></textarea>
+        <form id="replyForm" class="mt-4" th:if="${loginDTO.login != null}"
+              th:style="${!loginDTO.login} ? 'display: none;' : ''">
+            <input id="boardId" type="hidden" th:value=" ${dto.id}">
+            <input id="writerNickName" type="hidden" th:value=" ${loginDTO.nickName}">
+            <textarea id="replyContent" class="w-full border rounded p-2" rows="3" placeholder="댓글을 작성하세요." required></textarea>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mt-2">
                 댓글 작성
             </button>
@@ -52,10 +66,10 @@
     </div>
 
     <!-- 뒤로가기 및 수정 버튼 -->
-    <div class="text-right mt-4 flex justify-end space-x-4">
+    <div class="text-right mt-2 flex justify-end space-x-4">
         <div class="text-right mt-4 flex justify-end space-x-4">
             <!-- 삭제하기 버튼 -->
-            <form th:action="@{/board/remove}" method="post" th:if="${loginDTO.Role} == 'MANAGER' or ${loginDTO.Role} == 'ADMIN' or ${dto.writerName} == ${loginDTO.nickName}"
+            <form th:action="@{/board/remove}" method="post" th:if="${loginDTO.Role} == 'ADMIN' or ${dto.writerName} == ${loginDTO.nickName}"
                   th:object="${dto}" onsubmit="return confirm('정말 삭제하시겠습니까?')">
                 <input type="hidden" name="id" th:value="${dto.id}">
                 <input type="hidden" name="page" th:value="${requestDTO.page}">
@@ -73,11 +87,239 @@
             </a>
             <!-- 목록으로 버튼 -->
             <a th:href="@{/board/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}"
-               class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+               class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 mb-2">
                 목록으로
             </a>
         </div>
 
     </div>
 </main>
+
+<script>
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const memberWriter = document.getElementById("writerNickName").value;
+    function enableEdit(replyId, currentContent) {
+        const contentDiv = document.getElementById(`content-${replyId}`);
+        contentDiv.innerHTML = `
+        <textarea class="w-full border rounded p-2 mb-2" id="editContent-${replyId}">${currentContent}</textarea>
+        <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            onclick="saveReply(${replyId})">저장</button>
+    `;
+    }
+    function deleteReply(replyId) {
+        // 사용자에게 삭제 확인 메시지 표시
+        const userConfirmed = confirm("정말로 삭제하시겠습니까?");
+
+        if (userConfirmed) {
+            // 사용자가 확인을 눌렀을 때만 삭제 요청 수행
+            fetch(`/api/user/deleteReply`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken // CSRF 토큰 추가
+                },
+                body: JSON.stringify({ id: replyId }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("댓글 삭제 중 오류 발생");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // 삭제 후 댓글 내용 갱신
+                    location.reload();
+                })
+                .catch((error) => console.error(error.message));
+        } else {
+            // 사용자가 취소를 눌렀을 경우
+        }
+    }
+    document.getElementById("like").addEventListener("click", function (event) {
+        if (confirm("이 게시글을 추천하시겠습니까?")) {
+            const boardId = document.getElementById("boardId").value;
+
+            fetch("/api/board/updateLike", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken // CSRF 토큰 추가
+                },
+                body: JSON.stringify({
+                    boardId: boardId,
+                    likeStatus: true
+                })
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("추천 요청 실패");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    alert(data.message); // 서버에서 받은 메시지를 alert로 출력
+                    location.reload(); // 페이지 새로고침
+                })
+                .catch((error) => {
+                    alert(error.message); // 오류 메시지 표시
+                });
+        }
+    });
+
+    // 비추천 버튼 이벤트
+    document.getElementById("dislike").addEventListener("click", function (event) {
+        if (confirm("이 게시글을 비추천하시겠습니까?")) {
+            const boardId = document.getElementById("boardId").value;
+
+            fetch("/api/board/updateLike", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken // CSRF 토큰 추가
+                },
+                body: JSON.stringify({
+                    boardId: boardId,
+                    likeStatus: false
+                })
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("비추천 요청 실패");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    alert(data.message); // 서버에서 받은 메시지를 alert로 출력
+                    location.reload(); // 페이지 새로고침
+                })
+                .catch((error) => {
+                    alert(error.message); // 오류 메시지 표시
+                });
+        }
+    });
+    document.getElementById("replyForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // 폼의 기본 제출 방식을 방지
+
+        // 댓글 내용 가져오기
+        const content = document.getElementById("replyContent").value;
+        const boardId = document.getElementById("boardId").value;
+        // 서버로 전송
+        fetch("/api/user/addReply", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                [csrfHeader]: csrfToken // CSRF 토큰 추가
+            },
+            body: JSON.stringify({
+                memberWriter: memberWriter,
+                content: content,
+                boardId: boardId
+            })
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("댓글 작성 실패");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                location.reload();
+            })
+            .catch((error) => {
+                alert(error.message);
+            });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const boardId = document.getElementById("boardId").value;
+        const replyListElement = document.getElementById("replyList");
+        const paginationElement = document.getElementById("pagination");
+
+        // 댓글 데이터 가져오기
+        function fetchReplies(page = 1) {
+            fetch(`/api/user/getReplyList?boardId=${boardId}&page=${page}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("댓글 목록을 가져오는 중 오류가 발생했습니다.");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    renderReplies(data.dtoList);
+                    renderPagination(data.pageList, data.page, data.prev, data.next);
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                });
+        }
+
+        // 댓글 목록 렌더링
+        function renderReplies(replies) {
+            replyListElement.innerHTML = replies
+                .map(
+                    (reply) =>
+            `
+                    <li class="border-b py-4 flex justify-between items-center">
+    <!-- 댓글 내용 -->
+                        <div id="content-${reply.id}">
+                            <p class="text-gray-800">${reply.content}</p>
+                            <p class="text-gray-500 text-sm">작성자: ${reply.writer} | ${new Date(reply.regDate).toLocaleString()}</p>
+                        </div>
+                        <!-- 수정/삭제 버튼 -->
+                        ${
+
+                        reply.writer === memberWriter
+                            ? `
+                        <div class="flex space-x-2">
+                             <button class="text-blue-600 hover:underline" onclick="enableEdit(${reply.id}, '${reply.content}')">수정</button>
+                            <button class="text-red-600 hover:underline" onclick="deleteReply(${reply.id})">삭제</button>
+                        </div>
+                        `
+                            : ""
+                    }
+                    </li>
+                `
+                )
+                .join("");
+        }
+
+        // 페이지네이션 렌더링
+        function renderPagination(pageList, currentPage, hasPrev, hasNext) {
+            paginationElement.innerHTML = "";
+
+            // 이전 버튼
+            if (hasPrev) {
+                const prevButton = document.createElement("button");
+                prevButton.textContent = "이전";
+                prevButton.className = "px-3 py-1 bg-gray-300 rounded";
+                prevButton.addEventListener("click", () => fetchReplies(currentPage - 1));
+                paginationElement.appendChild(prevButton);
+            }
+
+            // 페이지 번호
+            pageList.forEach((page) => {
+                const pageButton = document.createElement("button");
+                pageButton.textContent = page;
+                pageButton.className = `px-3 py-1 ${page === currentPage ? "bg-blue-600 text-white" : "bg-gray-300"} rounded`;
+                pageButton.addEventListener("click", () => fetchReplies(page));
+                paginationElement.appendChild(pageButton);
+            });
+
+            // 다음 버튼
+            if (hasNext) {
+                const nextButton = document.createElement("button");
+                nextButton.textContent = "다음";
+                nextButton.className = "px-3 py-1 bg-gray-300 rounded";
+                nextButton.addEventListener("click", () => fetchReplies(currentPage + 1));
+                paginationElement.appendChild(nextButton);
+            }
+        }
+
+        // 초기 댓글 목록 가져오기
+        fetchReplies();
+    });
+
+
+</script>
 </html>

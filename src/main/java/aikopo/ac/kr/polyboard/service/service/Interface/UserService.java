@@ -17,6 +17,9 @@ public interface UserService {
 
     // 회원가입 로직
     Boolean saveMember(UserRegDTO userRegDTO);
+
+    // 수정 로직
+    Boolean modifyMember(UserRegDTO userRegDTO);
     // 비밀번호 찾기 로직
 
     //학과 목록 출력로직
@@ -24,4 +27,7 @@ public interface UserService {
 
     //유저 로그인 공통 dto 로직
     UserViewDTO getUserViewDto();
+
+    //유저 찾기
+    UserRegDTO getMember();
 }

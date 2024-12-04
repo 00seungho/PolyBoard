@@ -19,8 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserRestController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
     @PostMapping("/emailcheck")
     public ResponseEntity<Map<String, String>> checkEmail(@RequestBody Map<String, String> request) {

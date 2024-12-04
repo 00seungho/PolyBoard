@@ -7,6 +7,7 @@ import aikopo.ac.kr.polyboard.entity.*;
 import aikopo.ac.kr.polyboard.repository.MajorRepository;
 import aikopo.ac.kr.polyboard.repository.MemberRepository;
 import aikopo.ac.kr.polyboard.service.service.Interface.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class UserServiceImp implements UserService {
 
     @Autowired
@@ -48,6 +50,54 @@ public class UserServiceImp implements UserService {
         memberRepository.save(member);
         return Boolean.TRUE;
     }
+
+    @Override
+    public Boolean modifyMember(UserRegDTO userRegDTO) {
+        Optional<Member> memberOptional = memberRepository.findByEmail(userRegDTO.getEmail());
+        Member member = memberOptional.orElseThrow(() ->
+                new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userRegDTO.getEmail()));
+        log.info(userRegDTO);
+        member.changeAddress(userRegDTO.getAddress());
+        member.changeNickName(userRegDTO.getNickName());
+        member.changePhone(userRegDTO.getNumber());
+
+        memberRepository.save(member);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public UserRegDTO getMember() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 인증되지 않은 상태 처리
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("로그인 하세요");
+        }
+
+        // 인증된 사용자 정보 처리
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String userName = ((UserDetails) principal).getUsername();
+            Optional<Member> memberOptional = memberRepository.findByEmail(userName);
+
+            Member member = memberOptional.orElseThrow(() ->
+                    new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userName));
+
+            // UserRegDTO 생성 및 반환
+            return UserRegDTO.builder()
+                    .email(member.getEmail())
+                    .number(member.getPhone())
+                    .nickName(member.getNickname())
+                    .major(member.getMajor().getName())
+                    .name(member.getName())
+                    .address(member.getAddress())
+                    .build();
+        }
+
+        // principal이 UserDetails가 아닌 경우 처리
+        throw new IllegalArgumentException("유효하지 않은 사용자 정보입니다.");
+    }
+
 
     @Override
     public List<MajorListDTO> getMajorDtoList() {
@@ -132,6 +182,7 @@ public class UserServiceImp implements UserService {
                 .address(userRegDTO.getAddress())
                 .email(userRegDTO.getEmail())
                 .build();
+        log.info("맴버: "+member.toString());
         return member;
     }
 

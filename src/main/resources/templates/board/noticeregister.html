@@ -4,14 +4,21 @@
 <main class="container mx-auto mt-8">
     <!-- 글 작성 폼 -->
     <div class="bg-white shadow-md rounded p-6">
-        <form>
+        <form th:action="@{/board/register}" method="post">
+            <input type="hidden" name="page" th:value="${requestDTO.page}">
+            <input type="hidden" name="type" th:value="${requestDTO.type}">
+            <input type="hidden" name="keyword" th:value="${requestDTO.keyword}">
+            <input type="hidden" name="category" th:value="${requestDTO.category}">
+            <input type="hidden" name="boardMajor" value="공지">
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="title">제목</label>
-                <input type="text" id="title" class="w-full border rounded p-2" placeholder="제목을 입력하세요.">
+                <input type="text" name = "title" id="title" class="w-full border rounded p-2" placeholder="제목을 입력하세요.">
             </div>
+            <input type="hidden" name="departmentNotice" value="false">
+            <input type="hidden" name="allNotice" value="true">
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="content">내용</label>
-                <textarea id="content" class="w-full border rounded p-2" rows="5" placeholder="내용을 입력하세요."></textarea>
+                <textarea name="content" id="content" class="w-full border rounded p-2" rows="5" placeholder="내용을 입력하세요."></textarea>
             </div>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
                 작성하기
@@ -21,7 +28,7 @@
 
     <!-- 뒤로가기 버튼 -->
     <div class="text-right mt-4">
-        <a href="/" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">목록으로</a>
+        <a th:href="@{/board/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword}, category=${pageRequestDTO.category})}" class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">목록으로</a>
     </div>
 </main>
 </html>

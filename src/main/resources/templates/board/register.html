@@ -9,6 +9,8 @@
             <input type="hidden" name="type" th:value="${requestDTO.type}">
             <input type="hidden" name="keyword" th:value="${requestDTO.keyword}">
             <input type="hidden" name="category" th:value="${requestDTO.category}">
+            <input type="hidden" name="allNotice" value="false">
+            <input type="hidden" name="departmentNotice" value="false">
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="title">제목</label>
                 <input type="text" name = "title" id="title" class="w-full border rounded p-2" placeholder="제목을 입력하세요.">
@@ -17,7 +19,6 @@
             <div class="mb-4" th:if="${loginDTO.Role} == 'MANAGER'">
                 <label class="block text-gray-700 font-bold mb-2" for="isNotice">공지 여부</label>
                 <div class="flex items-center">
-                    <input type="hidden" name="departmentNotice" value="false">
                     <input type="checkbox" name="departmentNotice" id="isNotice" class="mr-2" value="true"
                            onchange="document.querySelector('input[name=departmentNotice][type=hidden]').disabled = this.checked;">
                     <label for="isNotice" class="text-gray-600">이 글을 공지로 등록합니다.</label>
@@ -28,8 +29,15 @@
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="major">게시판</label>
                 <select name="boardMajor" id="major" class="w-full border rounded p-2" required>
-                    <option value="" disabled selected>게시판을 선택하세요</option>
-                    <option th:each="dto : ${dtoList}" th:value="${dto.name}" th:text="${dto.name}"></option>
+                    <!-- 기본 옵션 -->
+                    <option value="" disabled
+                            th:selected="${pageRequestDTO.category == null}">게시판을 선택하세요</option>
+
+                    <!-- 동적으로 생성된 옵션 -->
+                    <option th:each="dto : ${dtoList}"
+                            th:value="${dto.name}"
+                            th:text="${dto.name}"
+                            th:selected="${dto.name == pageRequestDTO.category}"></option>
                 </select>
             </div>
 

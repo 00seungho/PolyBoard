@@ -3,6 +3,7 @@ package aikopo.ac.kr.polyboard.repository;
 import aikopo.ac.kr.polyboard.entity.Board;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -34,6 +35,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             "ORDER BY b.likes DESC")
     List<Board> findByLikesInLastWeek(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 
+
     //모든 공지 중 10개만
     List<Board> findTop10ByAllNoticeTrueOrderByIdDesc();
 
@@ -47,4 +49,14 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     //모든 게시물중 10개만
     List<Board> findTop10ByOrderByIdDesc();
 
+    //모든 게시글 내림차순
+    List<Board> findAllByOrderByIdDesc();
+
+    @Modifying
+    @Query("UPDATE Board b SET b.likes = " +
+            "(SELECT COUNT(ld) FROM LikeDislike ld WHERE ld.board.id = b.id AND ld.likeStatus = true), " +
+            "b.disLikes = " +
+            "(SELECT COUNT(ld) FROM LikeDislike ld WHERE ld.board.id = b.id AND ld.likeStatus = false) " +
+            "WHERE b.id = :boardId")
+    void updateLikesAndDislikes(@Param("boardId") Long boardId);
 }
