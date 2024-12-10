@@ -12,6 +12,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 font-bold mb-2" for="password">비밀번호</label>
                 <input type="password" id="password" name="password" class="w-full border rounded p-2" placeholder="비밀번호를 입력하세요" required>
+                <p id="loginErrorMSG" class="text-red-600 text-sm" th:if="${param.error}"></p>
             </div>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full">
                 로그인
@@ -21,14 +22,16 @@
             계정이 없으신가요? <a th:href="@{/user/register}" class="text-blue-600 hover:underline">회원가입</a>
         </p>
     </div>
-    <input type="hidden" th:value="${result}" id="message">
+    <!-- error 메시지 전달 -->
+    <input type="hidden" th:if="${param.error}" th:value="'아이디 또는 비밀번호가 틀렸습니다.'" id="loginError">
 </main>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const singupResult = document.getElementById("message").val
-        // 값이 존재하면 alert 창 띄우기
-        if (singupResult) {
-            alert(singupResult);
+        const loginError = document.getElementById("loginError");
+        if (loginError && loginError.value) {
+            const loginErrorMSG = document.getElementById("loginErrorMSG");
+            console.log(loginError.val)
+            loginErrorMSG.textContent = loginError.value;
         }
     });
 </script>

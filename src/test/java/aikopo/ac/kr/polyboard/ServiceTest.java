@@ -1,16 +1,13 @@
-package aikopo.ac.kr.polyboard.service;
+package aikopo.ac.kr.polyboard;
 
 import aikopo.ac.kr.polyboard.dto.*;
 import aikopo.ac.kr.polyboard.entity.Board;
-import aikopo.ac.kr.polyboard.entity.LikeDislike;
 import aikopo.ac.kr.polyboard.entity.Major;
 import aikopo.ac.kr.polyboard.entity.Member;
 import aikopo.ac.kr.polyboard.repository.BoardRepository;
 import aikopo.ac.kr.polyboard.repository.MajorRepository;
 import aikopo.ac.kr.polyboard.repository.MemberRepository;
 import aikopo.ac.kr.polyboard.security.CustomUserDetailsService;
-import aikopo.ac.kr.polyboard.service.service.Imp.BoardServiceImp;
-import aikopo.ac.kr.polyboard.service.service.Imp.ReplyServiceImp;
 import aikopo.ac.kr.polyboard.service.service.Interface.BoardService;
 import aikopo.ac.kr.polyboard.service.service.Interface.MainService;
 import aikopo.ac.kr.polyboard.service.service.Interface.ReplyService;
@@ -19,11 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -187,7 +181,7 @@ public class ServiceTest {
             UserRegDTO userRegDTO = UserRegDTO.builder()
                     .address("한국폴리텍대학 서울정수캠퍼스")
                     .number("010"+"1111"+String.format("%03d", i))
-                    .major("인공지능소프트웨어과")
+                    .major("인공지능소프트웨어")
                     .nickName("관리자"+generateNickname())
                     .name(generateRandomName())
                     .password("aaa111!!!")
